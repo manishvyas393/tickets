@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickets-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: new-ticket
+  template:
+    metadata:
+      labels:
+        app: new-ticket
+    spec:
+      containers:
+        - name: new-ticket
+          image: manishvyas393/new-ticket
+          env:
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: ticketing
+            - name: MONGO_URI
+              value: "mongodb://new-tickets-mongo-sr:27017/ticket"
+            - name: JWT_KEY
+              value: jalpeno
+            
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-tickets-sr
+spec:
+  selector:
+    app: new-ticket
+  ports:
+    - name: new-ticket
+      protocol: TCP
+      port: 4001
+      targetPort: 4001
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickets-mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tickets-mongo
+  template:
+    metadata:
+      labels:
+        app: tickets-mongo
+    spec:
+      containers:
+        - name: tickets-mongo
+          image: mongo
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-tickets-mongo-sr
+spec:
+  selector:
+    app: tickets-mongo
+  ports:
+    - name: new-tickets-mongo-sr
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+

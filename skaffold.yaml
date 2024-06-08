@@ -1,0 +1,43 @@
+apiVersion: skaffold/v4beta3
+kind: Config
+manifests:
+  rawYaml:
+    - ./kubernetes/*
+build:
+    local:
+      push: false
+    artifacts:
+      - image: manishvyas393/new-auth
+        context: auth
+        docker:
+         dockerfile: dockerfile
+        sync:
+          manual:
+            - src: 'src/**/*.ts'
+              dest: .
+      - image: manishvyas393/new-ticket
+        context: tickets
+        docker:
+         dockerfile: dockerfile
+        sync:
+          manual:
+            - src: 'src/**/*.ts'
+              dest: .
+      - image: manishvyas393/new-orders
+        context: orders
+        docker:
+         dockerfile: dockerfile
+        sync:
+          manual:
+            - src: 'src/**/*.ts'
+              dest: .
+      - image: manishvyas393/expiration
+        context: expiration
+        docker:
+          dockerfile: dockerfile
+        sync:
+          manual:
+            - src: 'src/**/*.ts'
+              dest: .
+      
+      

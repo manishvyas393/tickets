@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: manishvyas393/new-auth
+          env:
+            - name: MONGO_URI
+              value: "mongodb://new-auth-mongo-sr:27017/auth"
+            - name: JWT_KEY
+              value: jalpeno
+            
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-auth-sr
+spec:
+  selector:
+    app: auth
+  ports:
+    - name: auth
+      protocol: TCP
+      port: 4000
+      targetPort: 4000

@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: new-orders
+  template:
+    metadata:
+      labels:
+        app: new-orders
+    spec:
+      containers:
+        - name: new-orders
+          image: manishvyas393/new-orders
+          env:
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: ticketing
+            - name: MONGO_URI
+              value: "mongodb://new-orders-mongo-sr:27017/ticket"
+            - name: JWT_KEY
+              value: jalpeno
+            
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-orders-sr
+spec:
+  selector:
+    app: new-orders
+  ports:
+    - name: new-orders
+      protocol: TCP
+      port: 4002
+      targetPort: 4002
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-mongo
+  template:
+    metadata:
+      labels:
+        app: orders-mongo
+    spec:
+      containers:
+        - name: orders-mongo
+          image: mongo
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-orders-mongo-sr
+spec:
+  selector:
+    app: orders-mongo
+  ports:
+    - name: new-orders-mongo-sr
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+
